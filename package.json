@@ -1,0 +1,9 @@
+{
+  "name": "nova-sosyal",
+  "version": "1.0.0",
+  "description": "NOVA Sosyal — üyelikli, telefona kurulabilen sosyal medya uygulaması",
+  "main": "server.js",
+  "private": true,
+  "engines": { "node": ">=22.13" },
+  "scripts": { "start": "node server.js" }
+}

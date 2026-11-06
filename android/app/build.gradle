@@ -1,0 +1,50 @@
+plugins {
+    id 'com.android.application'
+}
+
+def serverUrl = (project.findProperty('novaUrl') ?: 'https://nova-sosyal.onrender.com').toString().replaceAll('/+$', '')
+
+android {
+    namespace 'com.nova.sosyal'
+    compileSdk 34
+
+    defaultConfig {
+        applicationId 'com.nova.sosyal'
+        minSdk 24
+        targetSdk 34
+        versionCode((project.findProperty('versionCode') ?: '1').toString().toInteger())
+        versionName '1.0'
+        buildConfigField 'String', 'SERVER_URL', "\"${serverUrl}\""
+    }
+
+    signingConfigs {
+        nova {
+            storeFile rootProject.file('nova.keystore')
+            storePassword 'novasosyal'
+            keyAlias 'nova'
+            keyPassword 'novasosyal'
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            signingConfig signingConfigs.nova
+        }
+        debug {
+            signingConfig signingConfigs.nova
+        }
+    }
+
+    buildFeatures { buildConfig true }
+
+    lint {
+        checkReleaseBuilds false
+        abortOnError false
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+}

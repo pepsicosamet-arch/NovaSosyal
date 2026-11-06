@@ -1,0 +1,9 @@
+# /etc/caddy/Caddyfile — alan adını kendi adresinle değiştir.
+# Caddy HTTPS sertifikasını kendisi alır ve yeniler.
+sosyal.ornekalanadi.com {
+    encode gzip
+    request_body {
+        max_size 8MB
+    }
+    reverse_proxy 127.0.0.1:3000
+}

@@ -1,0 +1,20 @@
+# Render "Blueprint": Render → New → Blueprint → bu depoyu seç.
+# Kalıcı disk yalnızca ücretli planda var; ücretsiz planda gönderiler ve üyeler silinir.
+services:
+  - type: web
+    name: nova-sosyal
+    runtime: node
+    plan: starter
+    region: frankfurt
+    buildCommand: echo "Paket kurulumu gerekmiyor"
+    startCommand: node server.js
+    healthCheckPath: /
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      - key: DATA_DIR
+        value: /var/data
+    disk:
+      name: nova-data
+      mountPath: /var/data
+      sizeGB: 1

@@ -1,0 +1,64 @@
+# NOVA Sosyal APK'sını GitHub'ın sunucularında derler.
+# Actions sekmesi → "NOVA Sosyal APK" → "Run workflow" → sunucu adresini yaz → çalıştır.
+# Bitince APK, Releases bölümünde doğrudan indirilebilir.
+name: NOVA Sosyal APK
+
+on:
+  workflow_dispatch:
+    inputs:
+      server_url:
+        description: "Sunucu adresi (ör. https://nova-sosyal.onrender.com). Boş bırakılırsa NOVA_URL değişkeni kullanılır."
+        required: false
+        default: ""
+  push:
+    branches: [main]
+    paths: ["android/**", ".github/workflows/android-apk.yml"]
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "8.9"
+
+      - name: Sunucu adresini belirle
+        id: url
+        run: |
+          URL="${{ github.event.inputs.server_url }}"
+          if [ -z "$URL" ]; then URL="${{ vars.NOVA_URL }}"; fi
+          if [ -z "$URL" ]; then
+            echo "::error::Sunucu adresi yok. 'Run workflow' ekranında adresi yaz ya da Settings → Variables'a NOVA_URL ekle."
+            exit 1
+          fi
+          echo "value=${URL%/}" >> "$GITHUB_OUTPUT"
+          echo "APK şu adresi açacak: ${URL%/}"
+
+      - name: APK derle
+        run: gradle -p android assembleRelease -PnovaUrl="${{ steps.url.outputs.value }}" -PversionCode=${{ github.run_number }}
+
+      - name: Dosyayı adlandır
+        run: cp android/app/build/outputs/apk/release/app-release.apk "NOVA-Sosyal-${{ github.run_number }}.apk"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: NOVA-Sosyal-apk
+          path: NOVA-Sosyal-${{ github.run_number }}.apk
+
+      - name: Release olarak yayınla (telefondan doğrudan indirilebilir)
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: apk-${{ github.run_number }}
+          name: NOVA Sosyal APK ${{ github.run_number }}
+          body: "Sunucu: ${{ steps.url.outputs.value }}"
+          files: NOVA-Sosyal-${{ github.run_number }}.apk
